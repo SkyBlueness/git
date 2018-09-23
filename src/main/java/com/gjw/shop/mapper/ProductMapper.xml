@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gjw.shop.mapper.ProductMapper">
+	
+  <resultMap type="com.gjw.shop.pojo.Product" id="productMap">
+  	<id column="pid" jdbcType="INTEGER" property="pid" />
+		<result column="pname" jdbcType="VARCHAR" property="pname" />
+		<result column="market_price" jdbcType="INTEGER" property="market_price" />
+		<result column="shop_price" jdbcType="INTEGER" property="shop_price" />
+		<result column="image" jdbcType="VARCHAR" property="image" />
+		<result column="pdesc" jdbcType="VARCHAR" property="pdesc" />
+		<result column="is_hot" jdbcType="INTEGER" property="is_hot" />
+		<result column="pdate" property="pdate" />
+  </resultMap>	
+	
+	<resultMap type="com.gjw.shop.pojo.Category" id="select_cList_map" autoMapping="true">
+		<id column="cid" property="cid"/>
+		<collection property="csList" javaType="com.gjw.shop.pojo.CategorySecond" autoMapping="true">
+			<id column="csid" property="csid"/>
+		</collection>
+	</resultMap>
+	
+  <select id="select_hot" resultMap="productMap">
+  	SELECT * from product 
+	WHERE is_hot = 1 
+	ORDER BY pdate DESC
+	LIMIT 0,10 
+  </select>
+  
+  <select id="select_new" resultMap="productMap">
+  	SELECT * from product 
+	ORDER BY pdate DESC
+	LIMIT 0,10 
+  </select>
+  
+  <select id="select_product_by_pid" resultMap="productMap" parameterType="int">
+  	SELECT * from product 
+	where pid=#{value}
+  </select>
+  
+  <select id="select_csList_by_cid" resultType="com.gjw.shop.pojo.CategorySecond" parameterType="int">
+  	SELECT * from categorysecond 
+	where cid=#{value}
+  </select>
+  
+  <select id="select_cList" resultMap="select_cList_map" >
+  	SELECT * from category c, categorysecond cs where c.cid=cs.cid
+  </select>
+  
+  <select id="select_by_cid" resultMap="productMap" parameterType="int">
+  	SELECT p.* FROM category c,categorysecond cs,product p WHERE c.cid=cs.cid and cs.csid=p.csid and c.cid=#{value}
+  </select>
+  
+  <select id="select_by_csid" resultMap="productMap" parameterType="int">
+  	SELECT p.* FROM categorysecond cs,product p WHERE p.csid=cs.csid and cs.csid=#{value}
+  </select>
+</mapper>

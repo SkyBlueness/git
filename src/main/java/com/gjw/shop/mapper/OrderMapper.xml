@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gjw.shop.mapper.OrderMapper">
+	<insert id="insert_order" useGeneratedKeys="true" keyColumn="oid"
+		keyProperty="oid" parameterType="com.gjw.shop.pojo.Order">
+		insert into orders(uid,state,total)
+		values(#{user.uid},#{state},#{total})
+	</insert>
+	
+	<update id="update_order"  parameterType="com.gjw.shop.pojo.Order">
+		update orders
+		<set>
+			<if test="state != null">
+				state = #{state},
+			</if>
+			<if test="name != null and name !=''">
+				name = #{name},
+			</if>
+			<if test="phone != null and phone != ''">
+				phone = #{phone},
+			</if>
+			<if test="addr != null and addr != ''">
+				addr = #{addr}
+			</if>
+		</set>
+		where oid = #{oid}
+	</update>
+
+	<insert id="insert_orderItem" parameterType="com.gjw.shop.pojo.OrderItem">
+		insert into
+		orderitem(pid,oid,count,subtotal)
+		values(#{product.pid},#{oid},#{count},#{subtotal})
+	</insert>
+
+	<select id="select_order_by_uid" parameterType="int" resultMap="order_list_map">
+		SELECT
+		orders.*,orderitem.*,product.*
+		FROM
+		orders,
+		orderitem,
+		product
+		WHERE
+		orders.oid = orderitem.oid
+		AND orderitem.pid=product.pid
+		AND orders.uid
+		= #{value}
+		ORDER BY orders.ordertime DESC
+	</select>
+	<resultMap type="com.gjw.shop.pojo.Order" id="order_list_map"
+		autoMapping="true">
+		<id column="oid" property="oid" />
+		<collection property="orderItems" javaType="com.gjw.shop.pojo.OrderItem"
+			autoMapping="true">
+			<id column="itemid" property="itemid" />
+			<collection property="product" javaType="com.gjw.shop.pojo.Product"
+				autoMapping="true">
+				<id column="pid" property="pid" />
+				<result column="pname" jdbcType="VARCHAR" property="pname" />
+				<result column="market_price" jdbcType="INTEGER" property="market_price" />
+				<result column="shop_price" jdbcType="INTEGER" property="shop_price" />
+				<result column="image" jdbcType="VARCHAR" property="image" />
+				<result column="pdesc" jdbcType="VARCHAR" property="pdesc" />
+				<result column="is_hot" jdbcType="INTEGER" property="is_hot" />
+				<result column="pdate" property="pdate" />
+			</collection>
+		</collection>
+	</resultMap>
+	<!-- orders表和user表的addr，name，phone字段一样，要区分 -->
+	<select id="select_order_by_oid" parameterType="int" resultMap="order_map">
+		SELECT
+		orders.uid,orders.total,orderitem.*,product.*,user.*
+		FROM
+		orders,
+		orderitem,
+		product,
+		user
+		WHERE
+		orders.oid = orderitem.oid
+		AND orderitem.pid=product.pid
+		AND orders.uid=user.uid
+		AND orders.oid = #{value}
+	</select>
+	
+	<resultMap type="com.gjw.shop.pojo.Order" id="order_map"
+		autoMapping="true">
+		<id column="oid" property="oid" />
+		<!-- 要按照顺序 -->
+		<association property="user" javaType="com.gjw.shop.pojo.User" autoMapping="true">
+			<id column="uid" property="uid" />
+				<result column="username" jdbcType="VARCHAR" property="username" />
+				<result column="password" jdbcType="VARCHAR" property="password" />
+				<result column="name" jdbcType="VARCHAR" property="name" />
+				<result column="addr" jdbcType="VARCHAR" property="addr" />
+				<result column="email" jdbcType="VARCHAR" property="email" />
+				<result column="phone" jdbcType="VARCHAR" property="phone" />
+				<result column="statu" jdbcType="INTEGER" property="statu" />
+		</association>
+		<collection property="orderItems" javaType="com.gjw.shop.pojo.OrderItem"
+			autoMapping="true">
+			<id column="itemid" property="itemid" />
+			<collection property="product" javaType="com.gjw.shop.pojo.Product"
+				autoMapping="true">
+				<id column="pid" property="pid" />
+				<result column="pname" jdbcType="VARCHAR" property="pname" />
+				<result column="market_price" jdbcType="INTEGER" property="market_price" />
+				<result column="shop_price" jdbcType="INTEGER" property="shop_price" />
+				<result column="image" jdbcType="VARCHAR" property="image" />
+				<result column="pdesc" jdbcType="VARCHAR" property="pdesc" />
+				<result column="is_hot" jdbcType="INTEGER" property="is_hot" />
+				<result column="pdate" property="pdate" />
+			</collection>
+		</collection>
+	</resultMap>
+</mapper>
